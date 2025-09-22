@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Badge } from "@/components/ui/badge"
 import {
   Target,
   BookOpen,
@@ -21,16 +23,77 @@ import {
   GraduationCap,
   Brain,
   MessageCircle,
+  CheckCircle,
+  AlertCircle,
+  Info,
 } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 
 export default function DashboardPage() {
   const [showComingSoon, setShowComingSoon] = useState(false)
+  const [notificationOpen, setNotificationOpen] = useState(false)
 
   const handleComingSoon = () => {
     setShowComingSoon(true)
     setTimeout(() => setShowComingSoon(false), 2000)
+  }
+
+  const notifications = [
+    {
+      id: 1,
+      type: "success",
+      title: "Application Submitted",
+      message: "Your scholarship application for Merit Award has been successfully submitted.",
+      time: "2 hours ago",
+      read: false,
+    },
+    {
+      id: 2,
+      type: "warning",
+      title: "Deadline Reminder",
+      message: "JEE Main registration closes in 5 days. Don't miss out!",
+      time: "1 day ago",
+      read: false,
+    },
+    {
+      id: 3,
+      type: "info",
+      title: "New College Added",
+      message: "IIT Hyderabad has been added to your recommended colleges list.",
+      time: "2 days ago",
+      read: true,
+    },
+    {
+      id: 4,
+      type: "success",
+      title: "Quiz Completed",
+      message: "Great job! You've completed your career aptitude assessment.",
+      time: "3 days ago",
+      read: true,
+    },
+    {
+      id: 5,
+      type: "info",
+      title: "Profile Update",
+      message: "Your profile is now 75% complete. Add more details to get better recommendations.",
+      time: "1 week ago",
+      read: true,
+    },
+  ]
+
+  const unreadCount = notifications.filter((n) => !n.read).length
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case "success":
+        return <CheckCircle className="w-4 h-4 text-green-500" />
+      case "warning":
+        return <AlertCircle className="w-4 h-4 text-amber-500" />
+      case "info":
+      default:
+        return <Info className="w-4 h-4 text-blue-500" />
+    }
   }
 
   return (
@@ -66,11 +129,57 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center space-x-4">
+            <Popover open={notificationOpen} onOpenChange={setNotificationOpen}>
+              <PopoverTrigger>
+                <Button variant="ghost" size="sm" className="hover:bg-indigo-50 relative">
+                  <Bell className="w-4 h-4 text-black" />
+                  {unreadCount > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500 hover:bg-red-500">
+                      {unreadCount}
+                    </Badge>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-0" align="end">
+                <div className="border-b p-4">
+                  <h3 className="font-semibold text-lg">Notifications</h3>
+                  <p className="text-sm text-gray-600">
+                    {unreadCount > 0 ? `${unreadCount} unread notifications` : "All caught up!"}
+                  </p>
+                </div>
+                <div className="max-h-96 overflow-y-auto">
+                  {notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`p-4 border-b last:border-b-0 hover:bg-gray-50 transition-colors ${
+                        !notification.read ? "bg-blue-50/50" : ""
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="mt-1">{getNotificationIcon(notification.type)}</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-medium text-sm truncate">{notification.title}</h4>
+                            {!notification.read && (
+                              <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-600 mb-2 line-clamp-2">{notification.message}</p>
+                          <p className="text-xs text-gray-500">{notification.time}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="p-4 border-t bg-gray-50">
+                  <Button variant="ghost" size="sm" className="w-full text-sm">
+                    Mark all as read
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
             <Button variant="ghost" size="sm" className="hover:bg-indigo-50">
-              <Bell className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm" className="hover:bg-indigo-50">
-              <Settings className="w-4 h-4" />
+              <Settings className="w-4 h-4 text-black" />
             </Button>
             <Avatar className="w-8 h-8 ring-2 ring-indigo-200">
               <AvatarImage src="/placeholder.svg?height=32&width=32" />
